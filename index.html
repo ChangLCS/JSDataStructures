@@ -17,13 +17,25 @@
   <meta content="telephone=no,email=no">
   <link rel="icon" href="data:;base64,=">
 
-  <script src="./src/index.js"></script>
+  <!-- <script src="./src/index.js"></script> -->
 
 </head>
 
 <body>
 
   <span>敲码使我平静</span>
+
+  <table id="my-table">
+  </table>
+
+  <script>
+    var $table = document.getElementById('my-table');
+    var $el = '';
+    for (let i = 0; i < 1000; i += 1) {
+      $el += '<tr><td>' + i + '</td></tr>'
+    }
+    $table.innerHTML = $el;
+  </script>
 
 </body>
 
