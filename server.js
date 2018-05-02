@@ -23,7 +23,7 @@ const server = http.createServer((req, res) => {
 
   const pathArr = urlInfo.path.match(pathReg);
 
-  fs.readFile(reqPath, function(err, data) {
+  fs.readFile(reqPath, function (err, data) {
     try {
       res.writeHead(200, {
         'content-type': pathArr ? `${mineType[pathArr[2]]};charset=utf-8` : 'charset=utf-8',
@@ -31,6 +31,7 @@ const server = http.createServer((req, res) => {
       res.write(data);
       res.end();
     } catch (error) {
+      res.end();
       console.error('error', reqPath, error);
     }
   });
