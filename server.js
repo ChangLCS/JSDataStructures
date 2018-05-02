@@ -23,17 +23,20 @@ const server = http.createServer((req, res) => {
 
   const pathArr = urlInfo.path.match(pathReg);
 
-  console.log('reqPath', reqPath);
   fs.readFile(reqPath, function(err, data) {
-    res.writeHead(200, {
-      'content-type': pathArr ? `${mineType[pathArr[2]]};charset=utf-8` : 'charset=utf-8',
-    });
-    res.write(data);
-    res.end();
+    try {
+      res.writeHead(200, {
+        'content-type': pathArr ? `${mineType[pathArr[2]]};charset=utf-8` : 'charset=utf-8',
+      });
+      res.write(data);
+      res.end();
+    } catch (error) {
+      console.error('error', reqPath, error);
+    }
   });
 });
 
-server.listen(8989);
+server.listen(8080);
 
 console.log('-----------------------------');
-console.log('port:8989      server running');
+console.log('port:8080      server running');

@@ -1,0 +1,374 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>CFCA Ultimate CryptoKit Demo</title>
+    <script type="text/javascript" src="nmCryptoKit.js"></script>
+    <script type="text/javascript" src="CryptoKit.js"></script>
+    <script language="javascript" type="text/javascript">
+
+        var CryptoAgent;
+
+        function OnLoad() {
+            try {
+                var eDiv = document.createElement("div");
+                var indexOpr = navigator.appVersion.indexOf("OPR");
+                var chromestr = "Chrome/";
+                var index = navigator.appVersion.indexOf(chromestr);
+                if (index >= 0 && indexOpr < 0) {
+                    var ChromeVersion = navigator.appVersion.substring(index + chromestr.length, index + chromestr.length + 2);
+                    if (ChromeVersion > 41) {
+                        CryptoAgent = new nmCryptokit();
+                    }
+                    else {
+                        CryptoAgent = new Cryptokit();
+                    }
+                }
+                else {
+                    CryptoAgent = new Cryptokit();
+                }
+                CryptoAgent.init();
+            }
+            catch (e) {
+                alert(e);
+                return;
+            }
+        }
+
+        function OnUnLoad() {
+            try {
+                CryptoAgent.uninit();
+            }
+            catch (e) {
+                alert(e);
+                return;
+            }
+        }
+
+        function GetLastErrorCallback(result) {
+            alert(result.value);
+        }
+
+        function SetSM2CSPList() {
+            var cspList = document.getElementById("SM2CSPFilter").value;
+            CryptoAgent.setSM2CSPList(cspList,
+                function callback(result) {
+                    if (0 == result.error) {
+                        alert("SetSM2CSPList: " + result.value);
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }
+
+        // Select certificate
+        function SelectCertificateOnClick() {
+            document.getElementById("SelectCertResult").value = "false";
+
+            var subjectDNFilter = "";
+            var issuerDNFilter = "";
+            var serialNumFilter = "";
+            subjectDNFilter = document.getElementById("SubjectDNFilter").value;
+            issuerDNFilter = document.getElementById("IssuerDNFilter").value;
+            serialNumFilter = document.getElementById("SerialNumFilter").value;
+
+            CryptoAgent.selectCertificate(subjectDNFilter, issuerDNFilter, serialNumFilter,
+                function callback(result) {
+                    if (0 == result.error) {
+                        document.getElementById("SelectCertResult").value = result.value;
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }
+
+        // Get certificate information
+        function GetCertInfoOnClick() {
+            var InfoTypeID = "";
+
+            document.getElementById("CertInfoContent").value = "";
+
+            // certificate information identifier
+            InfoTypeID = GetSelectedItemValue("InfoTypeID");
+
+            CryptoAgent.getSignCertInfo(InfoTypeID,
+                function callback(result) {
+                    if (0 == result.error) {
+                        document.getElementById("CertInfoContent").value = result.value;
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }
+
+        // Sign message
+        function SignOnClick() {
+            var source = "";
+            var signType = "";
+            var selectedAlg = GetSelectedItemValue("algorithm");
+            var IsWithSource = false;
+
+            document.getElementById("Signature").value = "";
+
+            // source
+            source = document.getElementById("SourceData").value;
+
+            // sign type
+            // certificate information identifier
+            signType = GetSelectedItemValue("SignType");
+
+            if ("Attach" == signType) {
+                // PKCS#7 Attach
+                IsWithSource = true;
+            }
+            else if ("Detach" == signType) {
+                // PKCS#7 Detach
+                IsWithSource = false;
+            }
+            CryptoAgent.signMsgPKCS7(source, selectedAlg, IsWithSource,
+                function callback(result) {
+                    if (0 == result.error) {
+                        document.getElementById("Signature").value = result.value;
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }
+
+        function VerifyPKCS7OnClick() {
+            var signature = "";
+            var signaturetype = "";
+
+            signature = document.getElementById("Signature").value;
+            signaturetype = GetSelectedItemValue("signalgorithm");
+            CryptoAgent.verifyMsgSignaturePKCS7Attached(signature, signaturetype,
+                function callback(result) {
+                    if (0 == result.error) {
+                        alert("验签结果：" + result.value);
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }
+
+        function VerifyPKCS7DetachedOnClick() {
+            var signature = "";
+            signaturetype = "";
+            var source = "";
+
+            signature = document.getElementById("Signature").value;
+            signaturetype = GetSelectedItemValue("signalgorithm");
+            source = document.getElementById("SourceData").value;
+            CryptoAgent.verifyMsgSignaturePKCS7Detached(signature, signaturetype, source,
+                function callback(result) {
+                    if (0 == result.error) {
+                        alert("验签结果：" + result.value);
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }
+
+        function GetSelectedItemValue(itemName) {
+            var ele = document.getElementsByName(itemName);
+            for (i = 0; i < ele.length; i++) {
+                if (ele[i].checked) {
+                    return ele[i].value;
+                }
+            }
+        }      
+    </script>
+</head>
+<body onload="javascript:OnLoad();" onunload="javascript:OnUnLoad()">
+    <table border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td>
+                <h1>
+                    消息签名与验签（演示版）</h1>
+            </td>
+        </tr>
+    </table>
+    <tr>
+        <td colspan="2">
+            <table id="no1" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td height="30">
+                        SM2 CSP列表：
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" id="SM2CSPFilter" value="CFCA CSP v3.0||CFCA Ulan CSP v4.0" style="width: 650px">
+                    </td>
+                </tr>
+                <tr>
+                    <td height="30">
+                        <input type="button" name="SetSM2CSPListButton" value="Select certificate [设置SM2 CSP列表]"
+                            onclick="SetSM2CSPList()">
+                    </td>
+                </tr>
+                <tr>
+                    <td height="30">
+                        证书主题DN：
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" id="SubjectDNFilter" style="width: 650px">
+                    </td>
+                </tr>
+                <tr>
+                    <td height="30">
+                        颁发者主题DN：
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" id="IssuerDNFilter" style="width: 650px">
+                    </td>
+                </tr>
+                <tr>
+                    <td height="30">
+                        证书序列号：
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" id="SerialNumFilter" style="width: 650px">
+                    </td>
+                </tr>
+                <tr>
+                    <td height="30">
+                        <input type="button" name="SelectCertificateButton" value="Select certificate [选择证书]"
+                            onclick="SelectCertificateOnClick()">
+                    </td>
+                </tr>
+                <tr>
+                    <td height="30">
+                        选择证书结果(返回值)：
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" id="SelectCertResult" style="width: 650px" />
+                    </td>
+                </tr>
+                <td height="30">
+                    <h3>
+                        获取选定证书的信息</h3>
+                </td>
+                <tr>
+                    <td height="30">
+                        信息类型标识：
+                    </td>
+                </tr>
+                <tr>
+                    <td height="30">
+                        <input type="radio" name="InfoTypeID" value="SubjectDN" checked="checked" />SubjectDN
+                        <input type="radio" name="InfoTypeID" value="SubjectCN" />SubjectCN
+                        <input type="radio" name="InfoTypeID" value="IssuerDN" />IssuerDN
+                        <input type="radio" name="InfoTypeID" value="SerialNumber" />SerialNumber
+                        <input type="radio" name="InfoTypeID" value="CSPName" />CSPName
+                        <input type="radio" name="InfoTypeID" value="CertType" />CertType
+                    </td>
+                </tr>
+                <tr>
+                    <td height="30">
+                        <input type="button" name="GetCertInfoButton" value="Get Cert Information [获取证书信息]"
+                            onclick="GetCertInfoOnClick()">
+                    </td>
+                </tr>
+                <tr>
+                    <td height="30">
+                        证书信息(返回值)：
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" id="CertInfoContent" style="width: 650px">
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <hr />
+    <label>
+        <h3>
+            消息签名</h3>
+    </label>
+    <label>
+        签名原文：
+        <br />
+        <textarea id="SourceData" rows="8" style="width: 650px">
+</textarea>
+    </label>
+    <br />
+    <label>
+        <td>
+            签名类型：
+        </td>
+    </label>
+    <td>
+        <input type="radio" name="SignType" value="Attach" checked="checked" />PKCS#7带原文签名
+        <input type="radio" name="SignType" value="Detach" />PKCS#7不带原文签名
+    </td>
+    <br />
+    <br />
+    <label>
+        <td>
+            哈希算法(仅对RSA算法有效，SM2默认使用SM3哈希算法)：
+        </td>
+    </label>
+    <td>
+        <input type="radio" name="algorithm" checked="checked" value="SHA-1" />SHA-1
+        <input type="radio" name="algorithm" value="SHA-256" />SHA-256
+    </td>
+    <br />
+    <br />
+    <label>
+        <td>
+            <input type="button" name="SignButton" value="Sign[签名]" onclick="SignOnClick()">
+        </td>
+    </label>
+    <br />
+    <br />
+    <label>
+        签名结果：
+        <br />
+        <textarea id="Signature" rows="8" style="width: 650px"></textarea>
+    </label>
+    <br />
+    <hr />
+    <label>
+        <h3>
+            消息验签</h3>
+    </label>
+    <label>
+        <td>
+            验签算法：
+        </td>
+    </label>
+    <td>
+        <input type="radio" name="signalgorithm" checked="checked" value="SM2" />SM2
+        <input type="radio" name="signalgorithm" value="RSA" />RSA
+    </td>
+    <br />
+    <br />
+    <label>
+        <td>
+            <input type="button" name="VerifyPKCS7Button" value="验证PKCS#7带原文签名" onclick="VerifyPKCS7OnClick()">
+        </td>
+    </label>
+    <label>
+        <td>
+            <input type="button" name="VerifyPKCS7DetachedButton" value="验证PKCS#7不带原文签名" onclick="VerifyPKCS7DetachedOnClick()">
+        </td>
+    </label>
+    <br />
+</body>
+</html>

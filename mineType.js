@@ -9,6 +9,7 @@ const type = {
   '.gif': 'image/gif',
   '.html': 'text/html',
   '.htm': 'text/html',
+  '.ico': 'image/x-icon',
 };
 
 module.exports = type;

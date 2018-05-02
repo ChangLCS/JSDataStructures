@@ -1,0 +1,409 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>CFCA Ultimate CryptoKit Demo</title>
+    <!--<object id="CryptoAgent" codebase="CryptoKit.Ultimate.x86.cab" classid="clsid:4C588282-7792-4E16-93CB-9744402E4E98"></object>-->
+    <style type="text/css">
+        #Cerfilepath
+        {
+            width: 567px;
+        }
+        #encrypt_no1
+        {
+            width: 96%;
+        }
+        #encrypt_no2
+        {
+            width: 96%;
+        }
+        .style1
+        {
+            width: 336px;
+        }
+        .style4
+        {
+            width: 448px;
+        }
+        .style5
+        {
+            width: 222px;
+        }
+        .style6
+        {
+            width: 218px;
+        }
+        #Decryptsm2filepath
+        {
+            width: 592px;
+        }
+        #Decryptsm2filepassword
+        {
+            width: 587px;
+        }
+        #Certresult
+        {
+            width: 362px;
+        }
+    </style>
+    <script type="text/javascript" src="nmCryptoKit.js"></script>
+    <script type="text/javascript" src="CryptoKit.js"></script>
+    <script language="javascript" type="text/javascript">
+
+    var CryptoAgent ;
+
+        function OnLoad() {
+            try {
+                var eDiv = document.createElement("div");
+                var indexOpr = navigator.appVersion.indexOf("OPR");
+                    var chromestr = "Chrome/";
+                    var index = navigator.appVersion.indexOf(chromestr);
+                if (index >= 0 && indexOpr < 0) {
+                    var ChromeVersion = navigator.appVersion.substring(index + chromestr.length, index + chromestr.length + 2);
+                    if (ChromeVersion > 41) {
+                        CryptoAgent = new nmCryptokit();
+                    }
+                    else {
+                        CryptoAgent = new Cryptokit();
+                    }
+                }
+                else {
+                    CryptoAgent = new Cryptokit();
+                }
+                CryptoAgent.init();
+            }
+            catch (e) {
+                alert(e);
+                return;
+            }
+        }
+
+        function OnUnLoad() {
+            try {
+                CryptoAgent.uninit();
+            }
+            catch (e) {
+                alert(e);
+                return;
+            }
+        }
+
+        function GetLastErrorCallback(result) {
+            alert(result.value);
+        }
+
+        function SetSM2CSPList() {
+            var cspList = document.getElementById("SM2CSPFilter").value;
+            CryptoAgent.setSM2CSPList(cspList,
+                function callback(result) {
+                    if (0 == result.error) {
+                        alert("SetSM2CSPList: " + result.value);
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }
+
+        // Select Encrypt certificate
+        function SelectCertificateOnClick() {
+            var subjectDNFilter = "";
+            var issuerDNFilter = "";
+            var SubjectDN = "";
+            var SerialNum = "";
+
+            document.getElementById("SelectCertDN").value = "";
+
+            subjectDNFilter = document.getElementById("SubjectDNFilter").value;
+            issuerDNFilter = document.getElementById("IssuerDNFilter").value;
+            SerialNum = document.getElementById("SerialNumFilter").value;
+
+            CryptoAgent.selectEncryptCertificate(subjectDNFilter, issuerDNFilter, SerialNum,
+            function callback(result) {
+                if (0 == result.error) {
+                    document.getElementById("SelectCertDN").value = result.value;
+                }
+                else {
+                    CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                }
+            });
+
+        }
+
+        // Get certificate information
+        function GetCertInfoOnClick() {
+            var InfoTypeID = "";
+
+            document.getElementById("CertInfoContent").value = "";
+
+            // certificate information identifier
+            InfoTypeID = GetSelectedItemValue("InfoTypeID");
+
+            CryptoAgent.getEncryptCertInfo(InfoTypeID,
+                function callback(result) {
+                    if (0 == result.error) {
+                        document.getElementById("CertInfoContent").value = result.value;
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }    
+
+        // Encrypt message
+        function EncryptMessage() {
+            var selectedIndex = 0;
+
+            var base64certdata = "";
+            var certtype = "";
+            var encryptmassage = "";
+            var encryptalg = "";
+
+            document.getElementById("Envelope").value = "";
+            if (document.getElementById("Base64CertData").value.length > 0) {
+                base64certdata = document.getElementById("Base64CertData").value;
+            }
+            certtype = GetSelectedItemValue("EncryptCertType");
+            if (document.getElementById("Encryptmassage").value.length > 0) {
+                encryptmassage = document.getElementById("Encryptmassage").value;
+            }
+            encryptalg = GetSelectedItemValue("EncryptAlg");
+            CryptoAgent.encryptMsgCMSEnvelope_ByCert(base64certdata, certtype, encryptmassage, encryptalg,
+                function callback(result) {
+                    if (0 == result.error) {
+                        document.getElementById("Envelope").value = result.value;
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }
+
+        function EncryptMessageEx() {
+            var base64certdata = "";
+            var certtype = "";
+            var encryptmassage = "";
+            var encryptalg = "";
+
+            document.getElementById("Envelope").value = "";
+            if (document.getElementById("Base64CertData").value.length > 0) {
+                base64certdata = document.getElementById("Base64CertData").value;
+            }
+            certtype = GetSelectedItemValue("EncryptCertType");
+            if (document.getElementById("Encryptmassage").value.length > 0) {
+                encryptmassage = document.getElementById("Encryptmassage").value;
+            }
+            encryptalg = GetSelectedItemValue("EncryptAlg");
+            CryptoAgent.encryptMsgCMSEnvelopeEx_ByCert(base64certdata, certtype, encryptmassage, encryptalg,
+                function callback(result) {
+                    if (0 == result.error) {
+                        document.getElementById("Envelope").value = result.value;
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }
+
+        function EncryptOnClick() {
+            try {
+                var selectedIndex = 0;
+                
+                if (selectedIndex == 0) {
+                    EncryptMessageEx();
+                }
+                else {
+                    EncryptMessage();
+                }
+            }
+            catch (e) {
+                var errorDesc = CryptoAgent.GetLastErrorDesc();
+                alert(errorDesc);
+            }
+        }
+
+        // Decrypt message
+        function DecryptMessage() {
+            //select decrypt
+            var envelope = "";
+            var decrypttype = "";
+
+            if (document.getElementById("Envelope").value.length > 0) {
+                envelope = document.getElementById("Envelope").value;
+            }
+            decrypttype = GetSelectedItemValue("DecryptCertType");
+            CryptoAgent.decryptMsgCMSEnvelope(envelope, decrypttype,
+                function callback(result) {
+                    if (0 == result.error) {
+                        document.getElementById("Decryptmessage").value = result.value;
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }
+
+        function DecryptMessageEx() {
+            //select decrypt
+            var envelope = "";
+            var decrypttype = "";
+
+            if (document.getElementById("Envelope").value.length > 0) {
+                envelope = document.getElementById("Envelope").value;
+            }
+            decrypttype = GetSelectedItemValue("DecryptCertType");
+            CryptoAgent.decryptMsgCMSEnvelopeEx(envelope, decrypttype,
+                function callback(result) {
+                    if (0 == result.error) {
+                        document.getElementById("Decryptmessage").value = result.value;
+                    }
+                    else {
+                        CryptoAgent.GetLastErrorDesc(GetLastErrorCallback);
+                    }
+                });
+        }
+
+        function DecryptOnClick() {
+            try {
+                var selectedIndex = 0;
+
+                if (selectedIndex == 0) {
+                    DecryptMessageEx();
+                }
+                else {
+                    DecryptMessage();
+                }
+            }
+            catch (e) {
+                var errorDesc = CryptoAgent.GetLastErrorDesc();
+                alert(errorDesc);
+            }
+        }
+
+        function GetSelectedItemValue(itemName) {
+            var ele = document.getElementsByName(itemName);
+            for (i = 0; i < ele.length; i++) {
+                if (ele[i].checked) {
+                    return ele[i].value;
+                }
+            }
+        }
+        function GetSelectedItemIndex(itemName) {
+
+            var ele = document.getElementsByName(itemName);
+            for (i = 0; i < ele.length; i++) {
+                if (ele[i].checked) {
+                    return i;
+                }
+            }
+        }
+    </script>
+</head>
+<body onload="javascript:OnLoad();" onunload="javascript:OnUnLoad()">
+    <table border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td>
+                <h1>
+                    消息加密与解密（演示版）</h1>
+            </td>
+        </tr>
+    </table>
+    <tr>       
+         <td colspan="2">
+            <table id="encrypt_no2" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td height="30" class="style4">
+                        用于加密的Base64编码公钥证书（不带头尾）：
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <textarea id="Base64CertData" rows="8" style="width: 650px"></textarea>
+                    </td>
+                </tr>
+                <tr>
+               <td>
+            证书类型：
+            <input type="radio" name="EncryptCertType" value="SM2" checked="checked" />SM2
+            <input type="radio" name="EncryptCertType" value="RSA" />RSA
+         </td>
+         </tr>
+            </table>
+        </td>
+        </tr>  
+            </table>
+        </td>
+        <hr />
+        <label>
+            <h3>
+                消息加密</h3>
+        </label>
+        <label>
+            待加密原文：
+        </label>
+            <br />
+            <textarea id="Encryptmassage" rows="8" style="width: 650px"></textarea>
+        <br />
+        <br />
+        <label>
+        <td>
+            加密算法（仅供RSA证书选择，SM2证书默认使用SM4加密算法）:
+        </td>
+    </label>
+    <td>
+        <input type="radio" name="EncryptAlg" value="RC4" checked="checked" />RC4
+        <input type="radio" name="EncryptAlg" value="3DES" />3DES
+    </td>
+    <br />
+    <br />
+    <label>
+        <td>
+            SM2加密类型:
+        </td>
+            <td>
+                <input type="button" name="EncryptButton" value="Encrypt[加密]" onclick="EncryptOnClick()">
+            </td>
+        </label>
+        <br />
+        <br />
+        <label>
+            加密密文：
+        </label>
+            <br />
+            <textarea id="Envelope" rows="8" style="width: 650px"></textarea>
+        <br />
+        <br />
+        <hr />
+        <label>
+            <h3>
+                消息解密</h3>
+        </label>
+    <td colspan="2">
+        <input type="text" id="SM2CSPFilter" value="CFCA CSP v3.0||CFCA Ulan CSP v4.0" style="width: 650px">
+    </td>
+    <br />
+    <br />
+    <td colspan="2">
+        <input type="button" name="SetSM2CSPListButton" value="Select certificate [设置SM2 CSP列表]"
+            onclick="SetSM2CSPList()">
+    </td>
+    <br />
+    <br />
+    <td>
+        证书类型：
+        <input type="radio" name="DecryptCertType" value="SM2" checked="checked" />SM2
+        <input type="radio" name="DecryptCertType" value="RSA" />RSA
+    </td>
+    </lable>
+    <td colspan="2">
+        <input type="button" name="Decrypt" value="Decrypt[解密]" onclick="DecryptOnClick()">
+        <br />
+        <br />
+        <label>
+        解密出的明文：
+        </label>
+        <br />
+        <textarea id="Decryptmessage" rows="8" style="width: 650px"></textarea>
+        <br />
+        <br />
+</body>
+</html>
