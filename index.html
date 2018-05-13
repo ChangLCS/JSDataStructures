@@ -25,16 +25,40 @@
 
   <span>敲码使我平静</span>
 
-  <table id="my-table">
-  </table>
+  <button onclick="WebSocketTest()">发送</button>
+  <button onclick="WebSocketClose()">关闭</button>
+
+  <div id="log"></div>
 
   <script>
-    var $table = document.getElementById('my-table');
-    var $el = '';
-    for (let i = 0; i < 1000; i += 1) {
-      $el += '<tr><td>' + i + '</td></tr>'
-    }
-    $table.innerHTML = $el;
+    var ws;
+
+    function WebSocketTest() {
+      // 打开一个 web socket
+      ws = new WebSocket("ws://localhost:3000");
+
+      ws.onopen = function () {
+        // Web Socket 已连接上，使用 send() 方法发送数据
+        ws.send("发送数据");
+        console.log("数据发送中...");
+      };
+
+      ws.onmessage = function (e) {
+        var data = e.data;
+        console.log("数据已接收...", e.data);
+        document.getElementById('log').innerHTML = document.getElementById('log').innerHTML += (e.data + "<br />");
+      };
+
+      ws.onclose = function () {
+        // 关闭 websocket
+        console.error("连接已关闭...");
+      };
+    };
+
+    //  关闭
+    function WebSocketClose() {
+      ws.close();
+    };
   </script>
 
 </body>
