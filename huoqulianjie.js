@@ -61,13 +61,13 @@
                 }, 2000);
               } else {
                 reload();
-                console.error('出错了，页码：', indexppppp);
+                console.error('出错了，页码：', indexppppp, new Date());
               }
             }
           };
         } else {
           reload();
-          console.error('页码报错，当前页码', indexppppp);
+          console.error('页码报错，当前页码', indexppppp, new Date());
         }
       }
     };
