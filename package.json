@@ -1,0 +1,23 @@
+{
+  "name": "jsdatastructures",
+  "version": "1.0.0",
+  "description": "学习 JavaScript 数据结构与算法",
+  "main": "CryptoKit.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChangLCS/JSDataStructures.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChangLCS/JSDataStructures/issues"
+  },
+  "homepage": "https://github.com/ChangLCS/JSDataStructures#readme",
+  "dependencies": {
+    "ws": "^5.1.1"
+  }
+}
