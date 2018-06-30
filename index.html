@@ -17,46 +17,115 @@
   <meta content="telephone=no,email=no">
   <link rel="icon" href="data:;base64,=">
 
-  <!-- <script src="./src/index.js"></script> -->
+  <style>
+    body {
+      font-size: 12px;
+    }
+
+    .content-list {
+      margin-bottom: 20px;
+    }
+
+    .content-list-title-name {
+      margin-right: 20px;
+    }
+  </style>
 
 </head>
 
 <body>
 
-  <button onclick="WebSocketTest()">发送</button>
-  <button onclick="WebSocketClose()">关闭</button>
+  <div>
 
-  <div id="log"></div>
+    <div>
+      <div>
+        姓名
+        <input name="name" type="text" />
+      </div>
+      <div>
+        <textarea name="msg"></textarea>
+      </div>
+      <button name="send" onclick="sendMessage()">发送</button>
+    </div>
+
+    <div class="content">
+    </div>
+
+  </div>
+
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 
   <script>
-    var ws;
+    var ws = new WebSocket("ws://localhost:3000");
 
-    function WebSocketTest() {
-      // 打开一个 web socket
-      ws = new WebSocket("ws://localhost:3000");
-
-      ws.onopen = function () {
-        // Web Socket 已连接上，使用 send() 方法发送数据
-        ws.send("发送数据");
-        console.log("数据发送中...");
-      };
-
-      ws.onmessage = function (e) {
-        var data = e.data;
-        console.log("数据已接收...", e.data);
-        document.getElementById('log').innerHTML = document.getElementById('log').innerHTML += (e.data + "<br />");
-      };
-
-      ws.onclose = function () {
-        // 关闭 websocket
-        console.error("连接已关闭...");
-      };
+    ws.onopen = function () {
+      console.log('链接上了');
     };
 
-    //  关闭
-    function WebSocketClose() {
-      ws.close();
+    var messageOld = '';
+    let messageData = [];
+    ws.onmessage = function (e) {
+      if (e.data !== messageOld) {
+        messageOld = e.data;
+        messageData = JSON.parse(messageOld);
+
+        renderHtml();
+      }
     };
+
+    ws.onclose = function () {
+      console.error("连接已关闭...");
+    };
+
+    window.onbeforeunload = function () {
+      ws.onclose();
+    };
+
+    function renderHtml() {
+      let html = '';
+      for (let i = 0; i < messageData.length; i += 1) {
+        const item = messageData[i];
+        html += '<div class="content-list">'
+          + '<div class="content-list-title">'
+          + `<span class="content-list-title-name">${item.name}</span>`
+          + `<span class="content-list-title-time">${item.time}</span>`
+          + '</div>'
+          + `<div class="content-list-msg">${item.msg}</div>`
+          + '</div>';
+      }
+      $('.content').html(html);
+    };
+
+    function nowDate() {
+      const date = new Date();
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+    };
+
+    function sendMessage() {
+      const name = $('[name=name]').val();
+      const msg = $('[name=msg]').val();
+      if (!name) {
+        return alert('输入姓名');
+      }
+      if (!msg) {
+        return alert('输入内容');
+      }
+
+      $('[name=name]').attr('disabled', true);
+      $('[name=msg]').val('');
+
+      const data = {
+        name,
+        msg,
+        time: nowDate(),
+      };
+      console.log('data', data);
+
+      messageData.push(data);
+      renderHtml();
+      ws.send(JSON.stringify(data));
+    };
+
   </script>
 
 </body>

@@ -8,19 +8,19 @@ const WebSocket = require('ws');
 
 const wss = new WebSocket.Server({ port: 3000 });
 
-wss.on('connection', function connection(ws) {
-  ws.on('message', function incoming(message) {
-    console.log('接受到的是：', message);
-  });
+const retList = [];
 
+wss.on('connection', function connection(ws) {
+  ws.on('message', function(message) {
+    retList.push(JSON.parse(message));
+  });
   const fun = () => {
-    ws.send(`你好啊 ${new Date()}`);
+    ws.send(JSON.stringify(retList));
   };
 
   const interval = setInterval(fun, 1000);
 
   ws.on('close', function() {
-    console.log('close');
     clearInterval(interval);
   });
 });

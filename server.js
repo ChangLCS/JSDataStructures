@@ -31,7 +31,7 @@ const server = http.createServer((req, res) => {
       res.write(data);
       res.end();
     } catch (error) {
-      console.error('error', reqPath, error);
+      console.error('error', reqPath);
       res.end();
     }
   });
