@@ -43,6 +43,11 @@
         <input name="name" type="text" />
       </div>
       <div>
+        与
+        <input name="acceptName" type="text" />聊天
+      </div>
+      <button name="send" onclick="register()">注册</button>
+      <div>
         <textarea name="msg"></textarea>
       </div>
       <button name="send" onclick="sendMessage()">发送</button>
@@ -101,21 +106,47 @@
       return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
     };
 
+    let isRegister = false;
+    function register() {
+      const name = $('[name=name]').val();
+      const acceptName = $('[name=acceptName]').val();
+      if (!name) {
+        return alert('姓名不能为空');
+      }
+      if (!acceptName) {
+        return alert('聊天对象不能为空');
+      }
+      $('[name=name]').attr('disabled', true);
+      $('[name=acceptName]').attr('disabled', true);
+
+      const data = {
+        type: 'register',
+        name,
+        acceptName,
+        roomName: `${name}-${acceptName}`,
+      };
+      isRegister = true;
+
+      ws.send(JSON.stringify(data));
+    };
+
     function sendMessage() {
       const name = $('[name=name]').val();
+      const acceptName = $('[name=acceptName]').val();
       const msg = $('[name=msg]').val();
-      if (!name) {
-        return alert('输入姓名');
+      if (!isRegister) {
+        return alert('请问你要跟谁聊天');
       }
       if (!msg) {
         return alert('输入内容');
       }
 
-      $('[name=name]').attr('disabled', true);
       $('[name=msg]').val('');
 
       const data = {
+        type: 'message',
         name,
+        acceptName,
         msg,
         time: nowDate(),
       };
